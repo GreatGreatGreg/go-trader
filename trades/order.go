@@ -2,12 +2,6 @@ package trades
 
 const (
 	_ = iota
-	Limit
-	Stop
-)
-
-const (
-	_ = iota
 	pBid
 	pBidPlus
 	pBidMid
@@ -23,7 +17,7 @@ const (
 
 type Order struct {
 	Symbol
-	Type   uint
+	IsStop bool
 	Amount int
 	Price  float64
 }
@@ -70,27 +64,63 @@ func (o *Order) SetPrice(priceType uint) {
 
 // Orders
 
-func (all []Order) Symbol(s Symbol) (orders []Order) {
+func (all []Order) Symbol(s string) (orders []Order) {
 	for _, one := range all {
-		if one.Symbol == s {
+		if one.Symbol.Symbol == s {
 			append(orders, one)
 		}
 	}
 	return
 }
 
-func (all []Order) Type(t uint) (orders []Order) {
+func (all []Order) LimitStop(t bool) (orders []Order) {
 	for _, one := range all {
-		if one.Type == t {
+		if (t && !one.IsStop) || (!t && one.IsStop) {
 			append(orders, one)
 		}
 	}
 	return
 }
 
-func (all []Order) Dir(d bool) (orders []Order) {
+func (all []Order) Limit() (orders []Order) {
+	for _, one := range all {
+		if !one.IsStop {
+			append(orders, one)
+		}
+	}
+	return
+}
+
+func (all []Order) Stop() (orders []Order) {
+	for _, one := range all {
+		if one.IsStop {
+			append(orders, one)
+		}
+	}
+	return
+}
+
+func (all []Order) LongShort(d bool) (orders []Order) {
 	for _, one := range all {
 		if (d && one.Amount > 0) || (!d && one.Amount < 0) {
+			append(orders, one)
+		}
+	}
+	return
+}
+
+func (all []Order) Long() (orders []Order) {
+	for _, one := range all {
+		if one.Amount > 0 {
+			append(orders, one)
+		}
+	}
+	return
+}
+
+func (all []Order) Short() (orders []Order) {
+	for _, one := range all {
+		if one.Amount < 0 {
 			append(orders, one)
 		}
 	}

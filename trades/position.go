@@ -6,9 +6,9 @@ type Position struct {
 	Price  float64
 }
 
-func (all []Position) Symbol(s Symbol) (positions []Position) {
+func (all []Position) Symbol(s string) (positions []Position) {
 	for _, one := range all {
-		if *one.Symbol == s {
+		if *one.Symbol.Symbol == s {
 			append(positions, one)
 		}
 	}
