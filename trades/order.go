@@ -1,32 +1,40 @@
 package trades
 
+// OrderPriceType - possible p
+type OrderPriceType uint8
+
 const (
-	_ = iota
-	pBid
-	pBidPlus
-	pBidMid
-	pMid
-	pMidPlus
-	pMidMid
-	pAskMinus
-	pAsk
-	pAskPlus
-	pAskDouble
-	pAskPercent
+	_                     = iota
+	optBid OrderPriceType = iota
+	optBidPlus
+	optBidMid
+	optMid
+	optMidPlus
+	optMidMid
+	optAskMinus
+	optAsk
+	optAskPlus
+	optAskDouble
+	optAskPercent
 )
 
+// Order - order structure
 type Order struct {
-	Symbol
+	Symbol *Symbol
 	IsStop bool
 	Amount int
 	Price  float64
 }
 
-func (o *Order) SetPrice(priceType uint) {
-	var price float64
-	dir := 1
+// Orders - collection of orders
+type Orders []Order
 
-	bid, ask := o.Symbol.Bid, o.Symbol.Ask
+// SetPrice - setting price of the order
+func (o *Order) SetPrice(priceType OrderPriceType) {
+	var price float64
+	dir := 1.
+
+	bid, ask := o.Symbol.Bid(), o.Symbol.Ask()
 
 	if o.Amount > 0 {
 		price = bid
@@ -36,92 +44,97 @@ func (o *Order) SetPrice(priceType uint) {
 	}
 
 	switch priceType {
-	case pBid:
+	case optBid:
 		o.Price = price
-	case pBidPlus:
-		o.Price = price + dir*o.Tick
-	case pBidMid:
+	case optBidPlus:
+		o.Price = price + dir*o.Symbol.TickSize()
+	case optBidMid:
 		o.Price = price + dir*(ask-bid)/4
-	case pMid:
+	case optMid:
 		o.Price = price + dir*(ask-bid)/2
-	case pMidPlus:
-		o.Price = price + dir*((ask-bid)/2+o.Tick)
-	case pMidMid:
+	case optMidPlus:
+		o.Price = price + dir*((ask-bid)/2+o.Symbol.TickSize())
+	case optMidMid:
 		o.Price = price + dir*3*(ask-bid)/4
-	case pAskMinus:
-		o.Price = price + dir*(ask-bid) - o.Tick
-	case pAsk:
+	case optAskMinus:
+		o.Price = price + dir*(ask-bid) - o.Symbol.TickSize()
+	case optAsk:
 		o.Price = bid + ask - price
-	case pAskPlus:
-		o.Price = bid + ask - price + dir*o.Tick
-	case pAskDouble:
+	case optAskPlus:
+		o.Price = bid + ask - price + dir*o.Symbol.TickSize()
+	case optAskDouble:
 		o.Price = price + dir*2*(ask-bid)
-	case pAskPercent:
+	case optAskPercent:
 		o.Price = price + dir*bid/100
 	}
 
 }
 
-// Orders
-
-func (all []Order) Symbol(s string) (orders []Order) {
+// Symbol - filters orders by symbol
+func (all Orders) Symbol(s string) (orders Orders) {
 	for _, one := range all {
-		if one.Symbol.Symbol == s {
-			append(orders, one)
+		if one.Symbol.Symbol() == s {
+			orders = append(orders, one)
 		}
 	}
 	return
 }
 
-func (all []Order) LimitStop(t bool) (orders []Order) {
+// LimitStop - filters orders by order type - limit = true, stop = false
+func (all Orders) LimitStop(t bool) (orders Orders) {
 	for _, one := range all {
 		if (t && !one.IsStop) || (!t && one.IsStop) {
-			append(orders, one)
+			orders = append(orders, one)
 		}
 	}
 	return
 }
 
-func (all []Order) Limit() (orders []Order) {
+// Limit - returns only limit orders
+func (all Orders) Limit() (orders Orders) {
 	for _, one := range all {
 		if !one.IsStop {
-			append(orders, one)
+			orders = append(orders, one)
 		}
 	}
 	return
 }
 
-func (all []Order) Stop() (orders []Order) {
+// Stop - filters everything but stop orders
+func (all Orders) Stop() (orders Orders) {
 	for _, one := range all {
 		if one.IsStop {
-			append(orders, one)
+			orders = append(orders, one)
 		}
 	}
 	return
 }
 
-func (all []Order) LongShort(d bool) (orders []Order) {
+// LongShort - filters orders by type - true = long, false = short
+func (all Orders) LongShort(d bool) (orders Orders) {
 	for _, one := range all {
 		if (d && one.Amount > 0) || (!d && one.Amount < 0) {
-			append(orders, one)
+			orders = append(orders, one)
 		}
 	}
 	return
 }
 
-func (all []Order) Long() (orders []Order) {
+// Long - filters everything but long orders
+func (all Orders) Long() (orders Orders) {
 	for _, one := range all {
 		if one.Amount > 0 {
-			append(orders, one)
+			orders = append(orders, one)
 		}
 	}
 	return
 }
 
-func (all []Order) Short() (orders []Order) {
+// Short - filters everything but short orders
+func (all Orders) Short() (orders Orders) {
 	for _, one := range all {
 		if one.Amount < 0 {
-			append(orders, one)
+			orders = append(orders, one)
 		}
 	}
 	return

@@ -1,57 +1,64 @@
 package trades
 
+// Position - type responsible for position
 type Position struct {
 	*Symbol
 	Amount int
 	Price  float64
 }
 
-func (all []Position) Symbol(s string) (positions []Position) {
+// Positions - slice of positions
+type Positions []Position
+
+// Symbol - filters positions by symbol
+func (all Positions) Symbol(s string) (positions Positions) {
 	for _, one := range all {
-		if *one.Symbol.Symbol == s {
-			append(positions, one)
+		if one.Symbol.Symbol() == s {
+			positions = append(positions, one)
 		}
 	}
 	return
 }
 
-func (all []Position) Dir(d bool) (positions []Position) {
+// Dir - filters positions by direction - true = buy, false = sell
+func (all Positions) Dir(d bool) (positions Positions) {
 	for _, one := range all {
 		if (d && one.Amount > 0) || (!d && one.Amount < 0) {
-			append(positions, one)
+			positions = append(positions, one)
 		}
 	}
 	return
 }
 
+// PnL - gets position's PnL
 func (p Position) PnL() (pnl float64) {
 
 	if p.Amount > 0 {
-		pnl = p.Amount * (p.Symbol.Bid - p.Price)
+		pnl = float64(p.Amount) * (p.Symbol.Bid() - p.Price)
 	} else {
-		pnl = p.Amount * (p.Price - p.Symbol.Ask)
+		pnl = float64(p.Amount) * (p.Price - p.Symbol.Ask())
 	}
 
 	return
 }
 
-func (p Position) Close(t uint) (order Order) {
+// Close - creates order to close position
+func (p Position) Close(t OrderPriceType) (order Order) {
 
 	order = Order{
 		Symbol: p.Symbol,
-		Type:   t,
 		Amount: -p.Amount}
 
 	order.SetPrice(t)
 	return
 }
 
-func (p Position) Scale(percent float64, t uint) (order Order) {
+// Scale - scales position
+func (p Position) Scale(percent float64, t OrderPriceType) (order Order) {
 
 	order = Order{
 		Symbol: p.Symbol,
-		Type:   t,
-		Amount: int(p.Amount * (percent - 1))}
+		Amount: int(float64(p.Amount) * (percent - 1))}
 
 	order.SetPrice(t)
 	return
