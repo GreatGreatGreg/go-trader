@@ -1,8 +1,8 @@
 package platform
 
-import "../trades"
+import "github.com/santacruz123/go-trader/trades"
 
-// Platform - interface of platform
+// Platformer - interface of platform
 type Platformer interface {
 
 	// Symbol - creates new Symbol
