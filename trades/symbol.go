@@ -92,7 +92,8 @@ func NewSymbol(
 	s string,
 	t AssetType,
 	size float64,
-	prices <-chan float64,
+	bids <-chan float64,
+	asks <-chan float64,
 ) (symbol *Symbol) {
 
 	symbol = &Symbol{
@@ -104,8 +105,12 @@ func NewSymbol(
 	go func() {
 		for {
 			select {
-			case price := <-prices:
-				symbol.pub(price, false)
+			case bid := <-bids:
+				symbol.bid = bid
+				symbol.pub(bid, false)
+			case ask := <-asks:
+				symbol.ask = ask
+				symbol.pub(ask, false)
 			}
 		}
 	}()

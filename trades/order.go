@@ -3,34 +3,40 @@ package trades
 // OrderPriceType - possible p
 type OrderPriceType uint8
 
+// Fast price calculation types
 const (
 	_                     = iota
-	optBid OrderPriceType = iota
-	optBidPlus
-	optBidMid
-	optMid
-	optMidPlus
-	optMidMid
-	optAskMinus
-	optAsk
-	optAskPlus
-	optAskDouble
-	optAskPercent
+	OptBid OrderPriceType = iota
+	OptBidPlus
+	OptBidMid
+	OptMid
+	OptMidPlus
+	OptMidMid
+	OptAskMinus
+	OptAsk
+	OptAskPlus
+	OptAskDouble
+	OptAskPercent
 )
 
 // Order - order structure
 type Order struct {
 	Symbol *Symbol
 	IsStop bool
-	Amount int
+	Amount float64
 	Price  float64
 }
 
 // Orders - collection of orders
 type Orders []Order
 
-// SetPrice - setting price of the order
-func (o *Order) SetPrice(priceType OrderPriceType) {
+// NewOrder - creates new empty order
+func NewOrder() *Order {
+	return &Order{}
+}
+
+// FastPrice - setting price of the order
+func (o *Order) FastPrice(priceType OrderPriceType) {
 	var price float64
 	dir := 1.
 
@@ -44,27 +50,27 @@ func (o *Order) SetPrice(priceType OrderPriceType) {
 	}
 
 	switch priceType {
-	case optBid:
+	case OptBid:
 		o.Price = price
-	case optBidPlus:
+	case OptBidPlus:
 		o.Price = price + dir*o.Symbol.TickSize()
-	case optBidMid:
+	case OptBidMid:
 		o.Price = price + dir*(ask-bid)/4
-	case optMid:
+	case OptMid:
 		o.Price = price + dir*(ask-bid)/2
-	case optMidPlus:
+	case OptMidPlus:
 		o.Price = price + dir*((ask-bid)/2+o.Symbol.TickSize())
-	case optMidMid:
+	case OptMidMid:
 		o.Price = price + dir*3*(ask-bid)/4
-	case optAskMinus:
+	case OptAskMinus:
 		o.Price = price + dir*(ask-bid) - o.Symbol.TickSize()
-	case optAsk:
+	case OptAsk:
 		o.Price = bid + ask - price
-	case optAskPlus:
+	case OptAskPlus:
 		o.Price = bid + ask - price + dir*o.Symbol.TickSize()
-	case optAskDouble:
+	case OptAskDouble:
 		o.Price = price + dir*2*(ask-bid)
-	case optAskPercent:
+	case OptAskPercent:
 		o.Price = price + dir*bid/100
 	}
 

@@ -3,7 +3,7 @@ package trades
 // Position - type responsible for position
 type Position struct {
 	*Symbol
-	Amount int
+	Amount float64
 	Price  float64
 }
 
@@ -47,9 +47,10 @@ func (p Position) Close(t OrderPriceType) (order Order) {
 
 	order = Order{
 		Symbol: p.Symbol,
-		Amount: -p.Amount}
+		Amount: -p.Amount,
+	}
 
-	order.SetPrice(t)
+	order.FastPrice(t)
 	return
 }
 
@@ -58,8 +59,9 @@ func (p Position) Scale(percent float64, t OrderPriceType) (order Order) {
 
 	order = Order{
 		Symbol: p.Symbol,
-		Amount: int(float64(p.Amount) * (percent - 1))}
+		Amount: p.Amount * (percent - 1),
+	}
 
-	order.SetPrice(t)
+	order.FastPrice(t)
 	return
 }
