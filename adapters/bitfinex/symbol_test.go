@@ -3,6 +3,7 @@ package bitfinex_test
 import (
 	"github.com/santacruz123/go-trader/adapters/bitfinex"
 	"github.com/santacruz123/go-trader/platform"
+	"github.com/santacruz123/go-trader/trades"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -18,13 +19,13 @@ var _ = Describe("Symbol", func() {
 			btcusd, _ := platform.Symbol("BTCUSD")
 			ltcusd, _ := platform.Symbol("LTCUSD")
 
-			btcPrices := make(chan float64)
-			ltcPrices := make(chan float64)
+			btcPrices := make(chan trades.Quotes)
+			ltcPrices := make(chan trades.Quotes)
 			btcusd.Sub(btcPrices)
 			ltcusd.Sub(ltcPrices)
 
-			Expect(<-btcPrices > 1.).Should(BeTrue())
-			Expect(<-ltcPrices > 1.).Should(BeTrue())
+			Expect((<-btcPrices).Bid > 1.).Should(BeTrue())
+			Expect((<-ltcPrices).Ask > 0.01).Should(BeTrue())
 		})
 	})
 })

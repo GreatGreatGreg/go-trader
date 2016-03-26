@@ -51,15 +51,15 @@ func (platform *bitfinex) ClosePlatform() {
 }
 
 func (platform *bitfinex) symbol(s string) *trades.Symbol {
-	prices := make(chan float64)
+	prices := make(chan trades.Quotes)
 	apiPrices := make(chan []float64)
 
-	platform.client.WebSocket.AddSubscribe(api.CHAN_BOOK, s, apiPrices)
+	platform.client.WebSocket.AddSubscribe(api.CHAN_TICKER, s, apiPrices)
 
 	go func() {
 		for pack := range apiPrices {
 			select {
-			case prices <- pack[0]:
+			case prices <- trades.Quotes{Bid: pack[0], Ask: pack[2]}:
 			default:
 			}
 		}
