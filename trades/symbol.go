@@ -1,6 +1,7 @@
 package trades
 
 import (
+	"fmt"
 	"log"
 	"sync"
 )
@@ -39,6 +40,10 @@ type Symbol struct {
 	bid      float64
 	ask      float64
 	subs     []chan<- Quotes
+}
+
+func (s *Symbol) String() string {
+	return fmt.Sprintf("Symbol: %s bid:%.2f ask:%.2f", s.symbol, s.bid, s.ask)
 }
 
 // Symbol - returns symbol as string
