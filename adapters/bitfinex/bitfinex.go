@@ -114,8 +114,12 @@ func (platform *bitfinex) Order(o trades.Order) (id uint, err error) {
 	return
 }
 
-func (platform *bitfinex) Cancel(id uint) (err error) {
-	return
+func (platform *bitfinex) Cancel(id uint) error {
+	return platform.client.Orders.Cancel(int(id))
+}
+
+func (platform *bitfinex) CancelAll() error {
+	return platform.client.Orders.CancelAll()
 }
 
 func (platform *bitfinex) Modify(id uint, order trades.Order) (err error) {

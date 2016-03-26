@@ -20,6 +20,9 @@ type Platformer interface {
 	// Cancel - cancels open order
 	Cancel(uint) error
 
+	// CancelAll - cancels all open order
+	CancelAll() error
+
 	// Modify - modifies open order
 	Modify(uint, trades.Order) error
 }

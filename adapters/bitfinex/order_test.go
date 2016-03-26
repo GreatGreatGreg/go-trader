@@ -48,6 +48,14 @@ var _ = Describe("Order", func() {
 			Expect(id).NotTo(BeZero())
 		})
 
-	})
+		It("Cancel order", func() {
+			err := platform.Cancel(669429429)
+			Expect(err).Should(Succeed())
+		})
 
+		It("Cancel all orders", func() {
+			err := platform.CancelAll()
+			Expect(err).Should(Succeed())
+		})
+	})
 })
