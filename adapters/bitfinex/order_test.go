@@ -44,10 +44,10 @@ var _ = Describe("Order", func() {
 			order.Price = 1
 			order.IsStop = true
 
-			id, err := platform.Order(*order)
+			orderId, err = platform.Order(*order)
 
 			Expect(err).Should(Succeed())
-			Expect(id).NotTo(BeZero())
+			Expect(orderId).NotTo(BeZero())
 		})
 
 		It("Cancel order", func() {
