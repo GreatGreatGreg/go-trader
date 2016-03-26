@@ -1,6 +1,7 @@
 package trades
 
 import (
+	"log"
 	"sync"
 )
 
@@ -23,6 +24,12 @@ const (
 	Option
 )
 
+// Quotes structure
+type Quotes struct {
+	Bid float64
+	Ask float64
+}
+
 // Symbol - structure for symbols
 type Symbol struct {
 	mu       sync.Mutex
@@ -31,9 +38,7 @@ type Symbol struct {
 	tickSize float64
 	bid      float64
 	ask      float64
-	bidCh    []chan<- float64
-	askCh    []chan<- float64
-	priceCh  []chan<- float64
+	subs     []chan<- Quotes
 }
 
 // Symbol - returns symbol as string
@@ -62,26 +67,15 @@ func (s *Symbol) Ask() float64 {
 	return val
 }
 
-// SubBid - Subcribes to the bid channel
-func (s *Symbol) SubBid(ch chan<- float64) {
-	s.bidCh = append(s.bidCh, ch)
-}
-
-// SubAsk - Subcribes to the ask channel
-func (s *Symbol) SubAsk(ch chan<- float64) {
-	s.askCh = append(s.askCh, ch)
-}
-
 // Sub - Subcribes to both bid and ask channels
-func (s *Symbol) Sub(ch chan<- float64) {
-	s.bidCh = append(s.bidCh, ch)
-	s.askCh = append(s.askCh, ch)
+func (s *Symbol) Sub(ch chan<- Quotes) {
+	s.subs = append(s.subs, ch)
 }
 
-func (s *Symbol) pub(price float64, bidask bool) {
-	for _, ch := range s.bidCh {
+func (s *Symbol) pub(quote Quotes) {
+	for _, ch := range s.subs {
 		select {
-		case ch <- price:
+		case ch <- quote:
 		default:
 		}
 	}
@@ -92,8 +86,7 @@ func NewSymbol(
 	s string,
 	t AssetType,
 	size float64,
-	bids <-chan float64,
-	asks <-chan float64,
+	quotes <-chan Quotes,
 ) (symbol *Symbol) {
 
 	symbol = &Symbol{
@@ -103,16 +96,16 @@ func NewSymbol(
 	}
 
 	go func() {
-		for {
-			select {
-			case bid := <-bids:
-				symbol.bid = bid
-				symbol.pub(bid, false)
-			case ask := <-asks:
-				symbol.ask = ask
-				symbol.pub(ask, false)
-			}
+		for quote := range quotes {
+
+			symbol.mu.Lock()
+			symbol.bid = quote.Bid
+			symbol.ask = quote.Ask
+			symbol.mu.Unlock()
+
+			symbol.pub(quote)
 		}
+		log.Println(s, "Quotes channel died")
 	}()
 
 	return
