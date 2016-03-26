@@ -96,6 +96,21 @@ func (platform *bitfinex) Positions() (positions trades.Positions, err error) {
 }
 
 func (platform *bitfinex) Order(o trades.Order) (id uint, err error) {
+
+	orderType := api.ORDER_TYPE_LIMIT
+
+	if o.IsStop {
+		orderType = api.ORDER_TYPE_STOP
+	}
+
+	var data *api.Order
+
+	data, err = platform.client.Orders.Create(o.Symbol.Symbol(), o.Amount, o.Price, orderType)
+
+	if err == nil {
+		return uint(data.Id), nil
+	}
+
 	return
 }
 
