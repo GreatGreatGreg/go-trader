@@ -14,6 +14,8 @@ var _ = Describe("Order", func() {
 	var platform platform.Platformer
 	platform = bitfinex.Get()
 
+	var orderId uint
+
 	Context("Order", func() {
 		It("Limit buy order", func() {
 
@@ -25,10 +27,10 @@ var _ = Describe("Order", func() {
 			order.Amount = 0.1
 			order.FastPrice(trades.OptMid)
 
-			id, err := platform.Order(*order)
+			orderId, err = platform.Order(*order)
 
 			Expect(err).Should(Succeed())
-			Expect(id).NotTo(BeZero())
+			Expect(orderId).NotTo(BeZero())
 		})
 
 		It("Stop sell order", func() {
@@ -49,7 +51,7 @@ var _ = Describe("Order", func() {
 		})
 
 		It("Cancel order", func() {
-			err := platform.Cancel(669429429)
+			err := platform.Cancel(orderId)
 			Expect(err).Should(Succeed())
 		})
 
