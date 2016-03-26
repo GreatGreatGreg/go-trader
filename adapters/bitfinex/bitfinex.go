@@ -5,7 +5,7 @@ import (
 	"os"
 	"sync"
 
-	api "github.com/bitfinexcom/bitfinex-api-go"
+	api "github.com/santacruz123/bitfinex-api-go"
 	"github.com/santacruz123/go-trader/platform"
 	"github.com/santacruz123/go-trader/trades"
 )
@@ -92,6 +92,23 @@ func (platform *bitfinex) Orders() (orders trades.Orders, err error) {
 }
 
 func (platform *bitfinex) Positions() (positions trades.Positions, err error) {
+	bfPositions, err := platform.client.Positions.All()
+
+	for _, one := range bfPositions {
+
+		symbol, err := platform.Symbol(one.Symbol)
+
+		if err != nil {
+			return nil, err
+		}
+
+		positions = append(positions, trades.Position{
+			Symbol: symbol,
+			Amount: one.Amount,
+			Price:  one.Base,
+		})
+	}
+
 	return
 }
 
