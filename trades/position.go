@@ -30,6 +30,46 @@ func (all Positions) Dir(d bool) (positions Positions) {
 	return
 }
 
+// Long - filters positions returns longs only
+func (all Positions) Long() (positions Positions) {
+	for _, one := range all {
+		if one.Amount > 0 {
+			positions = append(positions, one)
+		}
+	}
+	return
+}
+
+// Short - filters positions returns shorts only
+func (all Positions) Short() (positions Positions) {
+	for _, one := range all {
+		if one.Amount < 0 {
+			positions = append(positions, one)
+		}
+	}
+	return
+}
+
+// Profit - filters positions returns profitable only
+func (all Positions) Profit() (positions Positions) {
+	for _, one := range all {
+		if one.PnL() > 0 {
+			positions = append(positions, one)
+		}
+	}
+	return
+}
+
+// Lose - filters positions returns losing only
+func (all Positions) Lose() (positions Positions) {
+	for _, one := range all {
+		if one.PnL() <= 0 {
+			positions = append(positions, one)
+		}
+	}
+	return
+}
+
 // PnL - gets position's PnL
 func (p Position) PnL() (pnl float64) {
 
